@@ -4,7 +4,7 @@ import createFilter from 'rollup-pluginutils/src/createFilter.js';
 import rollup from '../rollup/index.js';
 import ensureArray from '../utils/ensureArray.js';
 import { mapSequence } from '../utils/promise.js';
-import { addTask, deleteTask } from './fileWatchers.js';
+import { addTask, deleteTask, setErroredId } from './fileWatchers.js';
 import chokidar from './chokidar.js';
 
 const DELAY = 100;
@@ -57,8 +57,10 @@ class Watcher extends EventEmitter {
 				this.emit('event', {
 					code: 'END'
 				});
+				setErroredId()
 			})
 			.catch(error => {
+				setErroredId(module.id)
 				this.emit('event', {
 					code: this.succeeded ? 'ERROR' : 'FATAL',
 					error

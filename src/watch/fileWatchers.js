@@ -6,6 +6,8 @@ const opts = { encoding: 'utf-8', persistent: true };
 
 const watchers = new Map();
 
+let erroredId
+
 export function addTask(id, task, chokidarOptions, chokidarOptionsHash) {
 	if (!watchers.has(chokidarOptionsHash)) watchers.set(chokidarOptionsHash, new Map());
 	const group = watchers.get(chokidarOptionsHash);
@@ -23,6 +25,10 @@ export function addTask(id, task, chokidarOptions, chokidarOptionsHash) {
 	}
 
 	group.get(id).tasks.add(task);
+}
+
+export function setErroredId(id) {
+	erroredId = id
 }
 
 export function deleteTask(id, target, chokidarOptionsHash) {
@@ -67,7 +73,7 @@ export default class FileWatcher {
 			} else {
 				// this is necessary because we get duplicate events...
 				const contents = fs.readFileSync(id, 'utf-8');
-				if (contents !== data) {
+				if (contents !== data || erroredId === id) {
 					data = contents;
 					this.trigger();
 				}
